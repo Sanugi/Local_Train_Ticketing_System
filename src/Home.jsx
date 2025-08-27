@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import image from './assets/train1.jpg'; 
 
 function Home() {
   const [from, setFrom] = useState("");
@@ -24,7 +25,7 @@ function Home() {
         }
       });
 
-      setTrains(response.data); // store the search results
+      setTrains(response.data); 
     } catch (err) {
       console.error(err);
       if (err.response?.data?.message) {
@@ -35,97 +36,111 @@ function Home() {
     }
   };
 
-     const handleBookSeat = (train) => {
-     navigate(`/SeatBooking/${train.trainNumber}`);
-    };
-
+  const handleBookSeat = (train) => {
+    navigate(`/SeatBooking/${train.trainNumber}`);
+  };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.header}>🚆 Where are you going?</h2>
+    <div style={{ 
+      ...styles.pageWrapper, 
+      backgroundImage: `url(${image})` 
+    }}>
+      <div style={styles.container}>
+        <h2 style={styles.header}>🚆 Where are you going?</h2>
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <div style={styles.inputGroup}>
-          <label>From Station</label>
-          <input
-            type="text"
-            placeholder="Enter departure station"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            style={styles.input}
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.inputGroup}>
+            <label>From Station</label>
+            <input
+              type="text"
+              placeholder="Enter departure station"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              style={styles.input}
+              required
+            />
+          </div>
 
-        <div style={styles.inputGroup}>
-          <label>To Station</label>
-          <input
-            type="text"
-            placeholder="Enter destination station"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            style={styles.input}
-            required
-          />
-        </div>
+          <div style={styles.inputGroup}>
+            <label>To Station</label>
+            <input
+              type="text"
+              placeholder="Enter destination station"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              style={styles.input}
+              required
+            />
+          </div>
 
-        <div style={styles.inputGroup}>
-          <label>Departure Date</label>
-          <input
-            type="date"
-            value={departure}
-            onChange={(e) => setDeparture(e.target.value)}
-            style={styles.input}
-            required
-          />
-        </div>
+          <div style={styles.inputGroup}>
+            <label>Departure Date</label>
+            <input
+              type="date"
+              value={departure}
+              onChange={(e) => setDeparture(e.target.value)}
+              style={styles.input}
+              required
+            />
+          </div>
 
-        <button type="submit" style={styles.button}>Search Train</button>
-      </form>
+          <button type="submit" style={styles.button}>Search Train</button>
+        </form>
 
-      {/* Error Message */}
-      {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+        {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
 
-      {/* Search Results */}
-      {trains.length > 0 && (
-        <div style={styles.ticketSection}>
-          <h3>Available Trains</h3>
-          {trains.map((train, index) => (
-            <div key={index} style={styles.ticketCard}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <p><strong>{train.trainName}</strong> ({train.trainNumber})</p>
-                  <p>From: {train.fromStation} → To: {train.ToStation}</p>
-                  <p>Departure: {train.departureDate} {train.departureTime}</p>
-                  <p>Ticket Price: Rs. {train.ticketPrice}</p>
-                  <p>Available Seats: {train.availableSeats}</p>
+        {trains.length > 0 && (
+          <div style={styles.ticketSection}>
+            <h3>Available Trains</h3>
+            {trains.map((train, index) => (
+              <div key={index} style={styles.ticketCard}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p><strong>{train.trainName}</strong> ({train.trainNumber})</p>
+                    <p>From: {train.fromStation} → To: {train.ToStation}</p>
+                    <p>Departure: {train.departureDate} {train.departureTime}</p>
+                    <p>Ticket Price: Rs. {train.ticketPrice}</p>
+                    <p>Available Seats: {train.availableSeats}</p>
+                  </div>
+                  <button
+                    style={styles.bookButton}
+                    onClick={() => handleBookSeat(train)}
+                  >
+                    Book Seat
+                  </button>
                 </div>
-                <button
-                  style={styles.bookButton}
-                  onClick={() => handleBookSeat(train)}
-                >
-                  Book Seat
-                </button>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      <Link to="/" style={styles.logout}>Logout</Link>
+        <Link to="/" style={styles.logout}>Logout</Link>
+      </div>
     </div>
   );
 }
 
 const styles = {
+  pageWrapper: {
+    minHeight: "100vh",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "20px"
+  },
   container: {
-    maxWidth: "700px",
+    maxWidth: "400px",
+    width: "100%",
     margin: "40px auto",
+    marginRight: "40px",
     padding: "30px",
     fontFamily: "sans-serif",
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "rgba(255, 255, 255, 0.61)", 
     borderRadius: "10px",
-    boxShadow: "0 0 12px rgba(0,0,0,0.1)",
+    boxShadow: "0 0 12px rgba(0,0,0,0.2)",
   },
   header: {
     textAlign: "center",
@@ -139,12 +154,15 @@ const styles = {
   inputGroup: {
     display: "flex",
     flexDirection: "column",
+    
   },
   input: {
     padding: "10px",
     borderRadius: "8px",
     border: "1px solid #ccc",
     fontSize: "16px",
+    backgroundColor: "rgba(255, 255, 255, 0.47)", 
+
   },
   button: {
     padding: "12px",
