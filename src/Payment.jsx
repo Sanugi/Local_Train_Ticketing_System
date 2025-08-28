@@ -1,145 +1,129 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import image from './assets/train.jpg';
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  TextField,
+  Paper,
+  Box,
+  Grid,
+  Typography,
+} from "@mui/material";
+import PaymentIcon from "@mui/icons-material/Payment";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import background from "./assets/payment.avif";
 
 function Payment() {
   const location = useLocation();
   const { selectedSeats, trainDetails } = location.state || { selectedSeats: [] };
 
   const [cardNumber, setCardNumber] = useState("");
+  const [cardHolder, setCardHolder] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
 
   const handlePayment = () => {
-    if (!cardNumber || !expiryDate || !cvv) {
+    if (!cardNumber || !cardHolder || !expiryDate || !cvv) {
       alert("Please fill in all fields.");
       return;
     }
-
     alert("Payment Successful! Tickets Booked.");
-  
   };
 
+  const defaultTheme = createTheme();
+
   return (
-    <div style={{ ...styles.container, backgroundImage: `url(${image})` }}>
-      <div style={styles.card}>
-        <h1 style={styles.heading}>Enter Your Payment Details</h1>
+    <ThemeProvider theme={defaultTheme}>
+      <Grid container component="main" sx={{ height: "100vh" }}>
+        <CssBaseline />
+        {/* Left side image */}
+        <Grid
+          item
+          xs={false}
+          sm={4}
+          md={7}
+          sx={{
+            backgroundImage: `url(${background})`,
+            backgroundRepeat: "no-repeat",
+            backgroundColor: (t) =>
+              t.palette.mode === "light"
+                ? t.palette.grey[50]
+                : t.palette.grey[900],
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        {/* Right side content */}
+        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+          <Box
+            sx={{
+              my: 8,
+              mx: 4,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+              <PaymentIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Payment Details
+            </Typography>
 
-        <div style={styles.trainDetails}>
-          <h3 style={styles.subHeading}>Train Details</h3>
-          <p><strong>Train Number:</strong> {trainDetails?.trainNumber}</p>
-          <p><strong>Train Name:</strong> {trainDetails?.trainName}</p>
-          <p><strong>Platform:</strong> {trainDetails?.platform}</p>
-          <p><strong>Departure Time:</strong> {trainDetails?.departureTime}</p>
-        </div>
-
-        <div style={styles.ticketInfo}>
-          <h3 style={styles.subHeading}>Selected Seats</h3>
-          <p>{selectedSeats.join(", ") || "None"}</p>
-        </div>
-
-        <div style={styles.paymentForm}>
-          <input
-            type="text"
-            placeholder="Card Number"
-            value={cardNumber}
-            onChange={(e) => setCardNumber(e.target.value)}
-            style={styles.input}
-          />
-          <input
-            type="text"
-            placeholder="Expiry Date (MM/YY)"
-            value={expiryDate}
-            onChange={(e) => setExpiryDate(e.target.value)}
-            style={styles.input}
-          />
-          <input
-            type="text"
-            placeholder="CVV"
-            value={cvv}
-            onChange={(e) => setCvv(e.target.value)}
-            style={styles.input}
-          />
-        </div>
-
-        <button onClick={handlePayment} style={styles.bookNowButton}>
-          Pay & Book
-        </button>
-      </div>
-    </div>
+            {/* Payment Form */}
+            <Box component="form" noValidate sx={{ mt: 2, width: "100%" }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Card Number"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Card Holder Name"
+                value={cardHolder}
+                onChange={(e) => setCardHolder(e.target.value)}
+              />
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  margin="normal"
+                  required
+                  label="MM/YY"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                  fullWidth
+                />
+                <TextField
+                  margin="normal"
+                  required
+                  label="CVV"
+                  value={cvv}
+                  onChange={(e) => setCvv(e.target.value)}
+                  fullWidth
+                />
+              </Box>
+              <Button
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                onClick={handlePayment}
+              >
+                Pay & Book
+              </Button>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+    </ThemeProvider>
   );
 }
 
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    backgroundSize: "cover", 
-    backgroundPosition: "center", 
-    backgroundRepeat: "no-repeat",
-    padding: "20px",
-  },
-  card: {
-    width: "100%",
-    maxWidth: "600px",
-    backgroundColor: "#ffffff",
-    borderRadius: "10px",
-    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-    padding: "40px",
-    textAlign: "center",
-    fontFamily: "'Roboto', sans-serif",
-    opacity: 0.9, 
-  },
-  heading: {
-    fontSize: "28px",
-    fontWeight: "bold",
-    marginBottom: "30px",
-    color: "#333",
-  },
-  subHeading: {
-    fontSize: "20px",
-    fontWeight: "600",
-    marginBottom: "15px",
-    textAlign: "left",
-    color: "#333",
-  },
-  trainDetails: {
-    textAlign: "left",
-    marginBottom: "30px",
-    borderBottom: "2px solid #f0f0f0",
-    paddingBottom: "20px",
-  },
-  ticketInfo: {
-    marginBottom: "30px",
-  },
-  paymentForm: {
-    marginBottom: "30px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    margin: "10px 0",
-    fontSize: "16px",
-    borderRadius: "5px",
-    border: "1px solid #ccc",
-    backgroundColor: "#f9f9f9",
-  },
-  bookNowButton: {
-    padding: "15px 30px",
-    fontSize: "18px",
-    backgroundColor: "#4caf50",
-    color: "#fff",
-    border: "none",
-    borderRadius: "30px",
-    cursor: "pointer",
-    transition: "background-color 0.3s, transform 0.2s",
-    width: "100%",
-    maxWidth: "200px",
-    marginTop: "30px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-};
-
 export default Payment;
+
+
