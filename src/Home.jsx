@@ -17,15 +17,15 @@ function Home() {
     setTrains([]);
 
     try {
-      const response = await axios.get("http://localhost:7000/api/users/getTrain", {
+      const response = await axios.get("http://localhost:7000/api/trains/filter", {
         params: {
           fromStation: from,
-          ToStation: to,
-          departureDate: departure
+          toStation: to,
+          date: departure
         }
       });
 
-      setTrains(response.data); 
+      setTrains(response.data.data); 
     } catch (err) {
       console.error(err);
       if (err.response?.data?.message) {
@@ -41,10 +41,13 @@ function Home() {
   };
 
   return (
+
     <div style={{ 
       ...styles.pageWrapper, 
       backgroundImage: `url(${image})` 
     }}>
+
+       <h1 style={styles.pageHeading}> Your Adventure Begins Here </h1>
       <div style={styles.container}>
         <h2 style={styles.header}>🚆 Where are you going?</h2>
 
@@ -121,6 +124,18 @@ function Home() {
 }
 
 const styles = {
+
+  pageHeading: {
+  position: "absolute",
+  top: "8%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  fontSize: "40px",
+  fontWeight: "bold",
+  color: "white",
+  textShadow: "2px 2px 6px rgba(0,0,0,0.5)",
+},
+
   pageWrapper: {
     minHeight: "100vh",
     backgroundSize: "cover",
@@ -207,3 +222,4 @@ const styles = {
 };
 
 export default Home;
+

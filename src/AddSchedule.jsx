@@ -1,128 +1,121 @@
 import React, { useState } from "react";
 import axios from "axios";
-import image from "./assets/train.jpg";
+import image from "./assets/train.jpg"; // reuse same background or use a new one
 
-function AddTrain() {
-const [formData, setFormData] = useState({
-  trainNumber: "",
-  trainName: "",
-  fromStation: "",
-  toStation: "",   
-  seatCount: "",   
-  ticketPrice: "",
- 
-});
+function AddSchedule() {
+  const [formData, setFormData] = useState({
+    trainId: "",
+    departureDate: "",
+    departureTime: "",
+    arrivalTime: "",
+    availableSeats: "",
+    date: "",
+  });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAddTrain = async () => {
+  const handleAddSchedule = async () => {
     try {
-        const payload = {
-             ...formData,
-      seatCount: Number(formData.seatCount),
-      ticketPrice: Number(formData.ticketPrice),
-        };
+      const payload = {
+        ...formData,
+        availableSeats: Number(formData.availableSeats),
+      };
 
-    //   const res = await axios.post("http://localhost:7000/api/users/addTrain", formData);
-    const res = await axios.post("http://localhost:7000/api/trains", payload, {
-    });
-        console.log(res.data);
-      alert("Train added successfully!");
+      const res = await axios.post("http://localhost:7000/api/schedules", payload);
+      console.log(res.data);
+      alert("Schedule added successfully!");
+
       setFormData({
-       trainNumber: "",
-       trainName: "",
-       fromStation: "",
-       toStation: "",
-       seatCount: "",
-       ticketPrice: "",
-    
+        trainId: "",
+        departureDate: "",
+        departureTime: "",
+        arrivalTime: "",
+        availableSeats: "",
+        date: "",
       });
-
     } catch (error) {
       console.error(error);
-      alert("Error adding train");
+      alert("Error adding schedule");
     }
   };
 
   return (
     <div style={{ ...styles.container, backgroundImage: `url(${image})` }}>
       <div style={styles.card}>
-        <h1 style={styles.heading}>Add New Train</h1>
+        <h1 style={styles.heading}>Add New Schedule</h1>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Train Number</label>
+          <label style={styles.label}>Train ID</label>
           <input
             type="text"
-            name="trainNumber"
-            value={formData.trainNumber}
+            name="trainId"
+            value={formData.trainId}
+            onChange={handleChange}
+            style={styles.input}
+            placeholder="Enter Train ID (MongoDB _id)"
+          />
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Departure Date</label>
+          <input
+            type="date"
+            name="departureDate"
+            value={formData.departureDate}
             onChange={handleChange}
             style={styles.input}
           />
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Train Name</label>
+          <label style={styles.label}>Departure Time</label>
           <input
-            type="text"
-            name="trainName"
-            value={formData.trainName}
+            type="time"
+            name="departureTime"
+            value={formData.departureTime}
             onChange={handleChange}
             style={styles.input}
           />
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>from Station</label>
+          <label style={styles.label}>Arrival Time</label>
           <input
-            type="text"
-            name="fromStation"
-            value={formData.fromStation}
-            onChange={handleChange}
-            style={styles.input}
-          />
-        </div>
-
-          <div style={styles.formGroup}>
-          <label style={styles.label}>to Station</label>
-          <input
-            type="text"
-            name="toStation"
-            value={formData.toStation}
+            type="time"
+            name="arrivalTime"
+            value={formData.arrivalTime}
             onChange={handleChange}
             style={styles.input}
           />
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Seat Count</label>
+          <label style={styles.label}>Available Seats</label>
           <input
             type="number"
-            name="seatCount"
-            value={formData.seatCount}
+            name="availableSeats"
+            value={formData.availableSeats}
             onChange={handleChange}
             style={styles.input}
             min={1}
           />
         </div>
 
-          <div style={styles.formGroup}>
-          <label style={styles.label}>Ticket Price</label>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Date</label>
           <input
-            type="number"
-            name="ticketPrice"
-            value={formData.ticketPrice}
+            type="date"
+            name="date"
+            value={formData.date}
             onChange={handleChange}
             style={styles.input}
-            min={0}
-            step={0.01}
-            placeholder="Enter price in Rs."
           />
         </div>
 
-        <button onClick={handleAddTrain} style={styles.addButton}>
-          Add Train
+        <button onClick={handleAddSchedule} style={styles.addButton}>
+          Add Schedule
         </button>
       </div>
     </div>
@@ -179,7 +172,7 @@ const styles = {
   addButton: {
     padding: "15px 30px",
     fontSize: "18px",
-    backgroundColor: "#2196f3",
+    backgroundColor: "#4caf50",
     color: "#fff",
     border: "none",
     borderRadius: "30px",
@@ -194,4 +187,4 @@ const styles = {
   },
 };
 
-export default AddTrain;
+export default AddSchedule;

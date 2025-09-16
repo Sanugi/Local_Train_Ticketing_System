@@ -223,7 +223,7 @@ function Signup() {
     e.preventDefault();
     setLoading(true); 
 
-    axios.post('http://localhost:7000/api/users/register', { name, email, password })
+    axios.post('http://localhost:7000/api/users/register', { username: name, email, password })
       .then((result) => {
         console.log(result);
         setLoading(false);

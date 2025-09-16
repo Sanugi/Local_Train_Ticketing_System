@@ -9,8 +9,9 @@ import BookTickets from "./BookTickets";
 import Payment from "./Payment";
 import ContactPage from "./ContactPage";
 import AddTrain from './AddTrain';
-
+import AddSchedule from './AddSchedule';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
 
 function App() {
   return (
@@ -25,7 +26,7 @@ function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/addTrain" element={<AddTrain />} />
-
+        <Route path="/addSchedule" element={<AddSchedule />} />
      
       </Routes>
     </BrowserRouter>

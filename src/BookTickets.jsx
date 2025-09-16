@@ -7,12 +7,10 @@ function BookTickets() {
   const navigate = useNavigate();
   const { selectedSeats } = location.state || { selectedSeats: [] };
 
-  // Hardcoded train details for now
   const trainDetails = {
-    trainNumber: "123A",
-    trainName: "Express 101",
-    platform: "5",
-    departureTime: "2025-04-10 10:30 AM",
+    trainNumber: "IC123",
+    trainName: "Intercity Express",
+    departureTime: "2025-09-05 07:30 AM",
   };
 
   const handleBookTrain = () => {
@@ -33,9 +31,9 @@ function BookTickets() {
           <p style={styles.detailItem}>
             <strong>Train Name:</strong> {trainDetails.trainName}
           </p>
-          <p style={styles.detailItem}>
+          {/* <p style={styles.detailItem}>
             <strong>Platform:</strong> {trainDetails.platform}
-          </p>
+          </p> */}
           <p style={styles.detailItem}>
             <strong>Departure Time:</strong> {trainDetails.departureTime}
           </p>
