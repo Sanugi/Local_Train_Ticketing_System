@@ -11,7 +11,7 @@ import ContactPage from "./ContactPage";
 import AddTrain from './AddTrain';
 import AddSchedule from './AddSchedule';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
+import AdminDashboard from './AdminDashBoard';
 
 function App() {
   return (
@@ -27,6 +27,7 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/addTrain" element={<AddTrain />} />
         <Route path="/addSchedule" element={<AddSchedule />} />
+        <Route path="/adminDashboard" element={<AdminDashboard />} />
      
       </Routes>
     </BrowserRouter>
