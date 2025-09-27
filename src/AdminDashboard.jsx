@@ -1,9 +1,12 @@
+import AddTrain from "./AddTrain";
+import AddSchedule from "./AddSchedule";
 import React, { useState } from "react";
 import {
   Box,
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Toolbar,
@@ -13,8 +16,8 @@ import {
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import TrainIcon from "@mui/icons-material/Train";
-import PeopleIcon from "@mui/icons-material/People";
 import SettingsIcon from "@mui/icons-material/Settings";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 const drawerWidth = 240;
 
@@ -24,18 +27,14 @@ function AdminDashboard() {
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon /> },
     { text: "Trains", icon: <TrainIcon /> },
-    { text: "Users", icon: <PeopleIcon /> },
+    { text: "Train Schedule", icon: <AccessTimeIcon /> },
     { text: "Settings", icon: <SettingsIcon /> },
   ];
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      {/* Top AppBar */}
-      <AppBar
-        position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      >
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
             Admin Dashboard
@@ -43,52 +42,58 @@ function AdminDashboard() {
         </Toolbar>
       </AppBar>
 
-      {/* Side Drawer */}
       <Drawer
         variant="permanent"
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
+          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
         }}
       >
         <Toolbar />
         <Box sx={{ overflow: "auto" }}>
           <List>
             {menuItems.map((item) => (
-              <ListItem
-                button
-                key={item.text}
-                onClick={() => setSelectedPage(item.text)}
-                selected={selectedPage === item.text}
-              >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton
+                  onClick={() => setSelectedPage(item.text)}
+                  selected={selectedPage === item.text}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>
         </Box>
       </Drawer>
 
-      {/* Main Content */}
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}
-      >
+      <Box component="main" sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}>
         <Toolbar />
-        <Typography variant="h4">{selectedPage}</Typography>
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          {selectedPage === "Dashboard" && "Welcome to the Admin Dashboard!"}
-          {selectedPage === "Trains" && "Manage train schedules and details here."}
-          {selectedPage === "Users" && "View and manage user accounts here."}
-          {selectedPage === "Settings" && "Configure system settings here."}
-        </Typography>
+
+        {selectedPage === "Dashboard" && (
+          <>
+            <Typography variant="h4">Dashboard</Typography>
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              Welcome to the Admin Dashboard!
+            </Typography>
+          </>
+        )}
+
+        {selectedPage === "Trains" && <AddTrain />}
+
+        {selectedPage === "Train Schedule" && <AddSchedule />}
+
+        {selectedPage === "Settings" && (
+          <>
+            <Typography variant="h4">Settings</Typography>
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              Configure system settings here.
+            </Typography>
+          </>
+        )}
       </Box>
     </Box>
-
   );
 }
 

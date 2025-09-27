@@ -243,10 +243,10 @@ function SeatBooking() {
                 style={{
                   ...styles.seat,
                   backgroundColor: isBooked
-                    ? "#ff4d4d"   // booked = red
+                    ? "#ff4d4d"   
                     : isSelected
-                    ? "#4caf50"   // selected = green
-                    : "#e0e0e0",  // available = grey
+                    ? "#4caf50"   
+                    : "#e0e0e0",  
                   color: isBooked || isSelected ? "#fff" : "#000",
                   cursor: isBooked ? "not-allowed" : "pointer"
                 }}

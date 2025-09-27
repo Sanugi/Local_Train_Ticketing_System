@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
-import image from "./assets/train.jpg";
 
 function AddTrain() {
-const [formData, setFormData] = useState({
-  trainNumber: "",
-  trainName: "",
-  fromStation: "",
-  toStation: "",   
-  seatCount: "",   
-  ticketPrice: "",
- 
-});
+  const [formData, setFormData] = useState({
+    trainNumber: "",
+    trainName: "",
+    fromStation: "",
+    toStation: "",
+    seatCount: "",
+    ticketPrice: "",
+  });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,27 +17,28 @@ const [formData, setFormData] = useState({
 
   const handleAddTrain = async () => {
     try {
-        const payload = {
-             ...formData,
-      seatCount: Number(formData.seatCount),
-      ticketPrice: Number(formData.ticketPrice),
-        };
+      const payload = {
+        ...formData,
+        seatCount: Number(formData.seatCount),
+        ticketPrice: Number(formData.ticketPrice),
+      };
+      console.log("Token being sent:", localStorage.getItem("token"));
+      const res = await axios.post("http://localhost:7000/api/trains", payload,
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
+      console.log("Token being sent:", localStorage.getItem("token"));
 
-    //   const res = await axios.post("http://localhost:7000/api/users/addTrain", formData);
-    const res = await axios.post("http://localhost:7000/api/trains", payload, {
-    });
-        console.log(res.data);
+      console.log(res.data);
       alert("Train added successfully!");
-      setFormData({
-       trainNumber: "",
-       trainName: "",
-       fromStation: "",
-       toStation: "",
-       seatCount: "",
-       ticketPrice: "",
-    
-      });
 
+      setFormData({
+        trainNumber: "",
+        trainName: "",
+        fromStation: "",
+        toStation: "",
+        seatCount: "",
+        ticketPrice: "",
+      });
     } catch (error) {
       console.error(error);
       alert("Error adding train");
@@ -47,7 +46,7 @@ const [formData, setFormData] = useState({
   };
 
   return (
-    <div style={{ ...styles.container, backgroundImage: `url(${image})` }}>
+    <div style={styles.container}>
       <div style={styles.card}>
         <h1 style={styles.heading}>Add New Train</h1>
 
@@ -74,7 +73,7 @@ const [formData, setFormData] = useState({
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>from Station</label>
+          <label style={styles.label}>From Station</label>
           <input
             type="text"
             name="fromStation"
@@ -84,8 +83,8 @@ const [formData, setFormData] = useState({
           />
         </div>
 
-          <div style={styles.formGroup}>
-          <label style={styles.label}>to Station</label>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>To Station</label>
           <input
             type="text"
             name="toStation"
@@ -107,7 +106,7 @@ const [formData, setFormData] = useState({
           />
         </div>
 
-          <div style={styles.formGroup}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>Ticket Price</label>
           <input
             type="number"
@@ -135,9 +134,6 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
     padding: "20px",
   },
   card: {
@@ -148,7 +144,6 @@ const styles = {
     boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
     padding: "40px",
     fontFamily: "'Roboto', sans-serif",
-    opacity: 0.9,
   },
   heading: {
     fontSize: "28px",

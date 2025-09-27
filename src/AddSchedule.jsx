@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-import image from "./assets/train.jpg"; // reuse same background or use a new one
 
 function AddSchedule() {
   const [formData, setFormData] = useState({
@@ -42,7 +41,7 @@ function AddSchedule() {
   };
 
   return (
-    <div style={{ ...styles.container, backgroundImage: `url(${image})` }}>
+    <div style={styles.container}>
       <div style={styles.card}>
         <h1 style={styles.heading}>Add New Schedule</h1>
 
@@ -128,9 +127,6 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     minHeight: "100vh",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
     padding: "20px",
   },
   card: {
@@ -141,7 +137,7 @@ const styles = {
     boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
     padding: "40px",
     fontFamily: "'Roboto', sans-serif",
-    opacity: 0.9,
+    opacity: 0.95,
   },
   heading: {
     fontSize: "28px",

@@ -27,9 +27,19 @@ function Login() {
 
     axios.post('http://localhost:7000/api/users/login', { email, password })
       .then(result => {
-       if (result.data.token) {
-      localStorage.setItem("token", result.data.token); 
-      navigate("/home");
+       if (result.data.accessToken) {
+      localStorage.setItem("token", result.data.accessToken); 
+      localStorage.setItem("role", JSON.stringify(result.data.userDetails.role));
+
+      if (result.data.userDetails.role === 'Admin') {
+        navigate("/adminDashboard");
+        setLoading(false); 
+        return;
+      }
+    else {
+      navigate("/home");              
+    }
+
     } else {
       alert("Invalid login credentials.");
     }
