@@ -1,6 +1,6 @@
-import AddTrain from "./AddTrain";
-import AddSchedule from "./AddSchedule";
-import React, { useState } from "react";
+import TrainManagement from "./TrainManagement";
+import ScheduleManagement from "./ScheduleManagement";
+import { useState, useEffect } from "react";
 import {
   Box,
   Drawer,
@@ -13,16 +13,59 @@ import {
   AppBar,
   Typography,
   CssBaseline,
+  Grid,
+  Container,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import TrainIcon from "@mui/icons-material/Train";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { BarChart, DoughnutChart, LineChart, StatCard } from "./components/Charts";
+import { dashboardService } from "./service/dashboardService";
 
 const drawerWidth = 240;
 
 function AdminDashboard() {
   const [selectedPage, setSelectedPage] = useState("Dashboard");
+  const [dashboardData, setDashboardData] = useState({
+    stats: { totalTrains: 0, totalSchedules: 0, totalSeats: 0, averageTicketPrice: 0 },
+    trainsByRoute: { labels: [], data: [] },
+    scheduleUtilization: { labels: [], data: [] },
+    priceDistribution: { labels: [], data: [] },
+    monthlyTrends: { labels: [], data: [] }
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (selectedPage === "Dashboard") {
+      fetchDashboardData();
+    }
+  }, [selectedPage]);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const [stats, trainsByRoute, scheduleUtilization, priceDistribution, monthlyTrends] = await Promise.all([
+        dashboardService.getDashboardStats(),
+        dashboardService.getTrainsByRoute(),
+        dashboardService.getScheduleUtilization(),
+        dashboardService.getTicketPriceDistribution(),
+        dashboardService.getMonthlyScheduleTrends()
+      ]);
+
+      setDashboardData({
+        stats,
+        trainsByRoute,
+        scheduleUtilization,
+        priceDistribution,
+        monthlyTrends
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon /> },
@@ -72,17 +115,131 @@ function AdminDashboard() {
         <Toolbar />
 
         {selectedPage === "Dashboard" && (
-          <>
-            <Typography variant="h4">Dashboard</Typography>
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              Welcome to the Admin Dashboard!
+          <Container maxWidth="xl">
+            <Typography variant="h4" gutterBottom>
+              Dashboard Overview
             </Typography>
-          </>
+            
+            {loading ? (
+              <Typography>Loading dashboard data...</Typography>
+            ) : (
+              <>
+                {/* Statistics Cards */}
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <StatCard 
+                      title="Total Trains" 
+                      value={dashboardData.stats.totalTrains}
+                      subtitle="Active trains in system"
+                      color="#1976d2"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <StatCard 
+                      title="Total Schedules" 
+                      value={dashboardData.stats.totalSchedules}
+                      subtitle="Scheduled trips"
+                      color="#388e3c"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <StatCard 
+                      title="Total Seats" 
+                      value={dashboardData.stats.totalSeats}
+                      subtitle="Available seat capacity"
+                      color="#f57c00"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <StatCard 
+                      title="Avg. Ticket Price" 
+                      value={`Rs. ${dashboardData.stats.averageTicketPrice.toFixed(2)}`}
+                      subtitle="Average price per ticket"
+                      color="#7b1fa2"
+                    />
+                  </Grid>
+                </Grid>
+
+                {/* Charts */}
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <BarChart 
+                      title="Trains by Route"
+                      data={{
+                        labels: dashboardData.trainsByRoute.labels,
+                        datasets: [{
+                          label: 'Number of Trains',
+                          data: dashboardData.trainsByRoute.data,
+                          backgroundColor: 'rgba(25, 118, 210, 0.8)',
+                          borderColor: 'rgba(25, 118, 210, 1)',
+                          borderWidth: 1
+                        }]
+                      }}
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12} md={6}>
+                    <DoughnutChart 
+                      title="Seat Utilization"
+                      data={{
+                        labels: dashboardData.scheduleUtilization.labels,
+                        datasets: [{
+                          data: dashboardData.scheduleUtilization.data,
+                          backgroundColor: [
+                            'rgba(56, 142, 60, 0.8)',
+                            'rgba(245, 124, 0, 0.8)'
+                          ],
+                          borderColor: [
+                            'rgba(56, 142, 60, 1)',
+                            'rgba(245, 124, 0, 1)'
+                          ],
+                          borderWidth: 1
+                        }]
+                      }}
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12} md={6}>
+                    <BarChart 
+                      title="Ticket Price Distribution"
+                      data={{
+                        labels: dashboardData.priceDistribution.labels,
+                        datasets: [{
+                          label: 'Number of Trains',
+                          data: dashboardData.priceDistribution.data,
+                          backgroundColor: 'rgba(123, 31, 162, 0.8)',
+                          borderColor: 'rgba(123, 31, 162, 1)',
+                          borderWidth: 1
+                        }]
+                      }}
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12} md={6}>
+                    <LineChart 
+                      title="Monthly Schedule Trends"
+                      data={{
+                        labels: dashboardData.monthlyTrends.labels,
+                        datasets: [{
+                          label: 'Schedules',
+                          data: dashboardData.monthlyTrends.data,
+                          borderColor: 'rgba(245, 124, 0, 1)',
+                          backgroundColor: 'rgba(245, 124, 0, 0.2)',
+                          tension: 0.4,
+                          fill: true
+                        }]
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </>
+            )}
+          </Container>
         )}
 
-        {selectedPage === "Trains" && <AddTrain />}
+        {selectedPage === "Trains" && <TrainManagement />}
 
-        {selectedPage === "Train Schedule" && <AddSchedule />}
+        {selectedPage === "Train Schedule" && <ScheduleManagement />}
 
         {selectedPage === "Settings" && (
           <>

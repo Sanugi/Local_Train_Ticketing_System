@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -14,6 +13,7 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import image from './assets/train.jpg'; 
+import axiosInstance from './service/axiosInstance';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -25,7 +25,7 @@ function Login() {
     e.preventDefault();
     setLoading(true); 
 
-    axios.post('http://localhost:7000/api/users/login', { email, password })
+    axiosInstance.post('/users/login', { email, password })
       .then(result => {
        if (result.data.accessToken) {
       localStorage.setItem("token", result.data.accessToken); 

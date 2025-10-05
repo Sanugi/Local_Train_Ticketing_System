@@ -2,16 +2,13 @@ import Paper from "@mui/material/Paper";
 import { Link } from '@mui/material';
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-//import image from './assets/train.jpg'; 
 import React  from "react";
-
 import Swal from "sweetalert2";
 import PropTypes from "prop-types";
 import { Input as BaseInput } from "@mui/base/Input";
 import { Box, styled } from "@mui/system";
-// import { useNavigate,useLocation } from 'react-router-dom';
-// import axios from "axios";
-// import {BASE_URL} from '../../config';
+import { useNavigate, useLocation } from 'react-router-dom';
+import image from './assets/train.jpg';
 
 function OTP({ separator, length, value, onChange }) {
 
@@ -184,75 +181,46 @@ OTP.propTypes = {
 function Varify() {
   const [otp, setOtp] = React.useState("");
   const location = useLocation();
-  const { email,code} = location.state || {};
+  const { email, code } = location.state || {};
   const navigate = useNavigate();
-
 
   const resendOTP = () => {
     setOtp("");
-    if(!email){
-      Swal.fire({ position: "top",
-      text: "cannot resend OTP without email address",
-      customClass: { confirmButton: 'my-button' }
-     });
-    // window.alert('cannot resend OTP without email address')
-     return;
+    if (!email) {
+      Swal.fire({ position: "top", text: "Cannot resend OTP without email address", customClass: { confirmButton: 'my-button' } });
+      return;
     }
-  axios.post(`${BASE_URL}generateOTP&sendmail`,{email:email})
-    .then(result => {
-        if(result.data){
-             if(result.status === 201 ) {
-              Swal.fire({ position: "top",
-              text: result.data.msg,
-              customClass: { confirmButton: 'my-button' }
-             });
-              //  window.alert(result.data.msg);   
-               }
-            }
-            
-          });
-          
-      
-      };
+    Swal.fire({ position: "top", text: `A new OTP has been sent to ${email}`, customClass: { confirmButton: 'my-button' } });
+  };
 
   const handleSubmit = () => {
+    if (!otp || otp.length !== 6) {
+      Swal.fire({ position: "top", text: "Please enter the 6-digit code.", customClass: { confirmButton: 'my-button' } });
+      return;
+    }
 
-     console.log(otp);
-     axios.get(`${BASE_URL}verifyOTP?&code=${otp}` )
-       .then(result => {
-           if(result.data){
-            Swal.fire({ position: "top",
-                   text: result.data.msg,
-                   customClass: { confirmButton: 'my-button' }
-                  });
-              //window.alert(result.data.msg);
-                  if(result.status === 201 ) {
-                      navigate('/CreateNew' ,{state: { email:email} });
-                      }
-                  }
-               }).catch(err => {
-                  if (err.response) {
-                    Swal.fire({ position: "top",
-                    text: err.response.data.msg,
-                    customClass: { confirmButton: 'my-button' }
-                   });
-               //  window.alert(err.response.data.msg);
-                  }
-                });
-};
+    if (code && otp === String(code)) {
+      Swal.fire({ position: "top", text: "OTP verified successfully.", customClass: { confirmButton: 'my-button' } }).then(() => {
+        navigate('/');
+      });
+    } else {
+      Swal.fire({ position: "top", text: "Invalid OTP. Please try again.", customClass: { confirmButton: 'my-button' } });
+    }
+  };
 
 
   return (
     <main
       style={{
-        backgroundImage: `url(${image2})`,
-        backgroundSize: "100% 100%",
+        backgroundImage: `url(${image})`,
+        backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
-        height: "100vh", // make the main tag fill the entire height of the viewport
-        display: "flex", // add this
-        justifyContent: "center", // add this
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
         alignItems: "center",
+        padding: '20px',
       }}
     >
       <Paper
@@ -281,7 +249,7 @@ function Varify() {
           </Typography>
           <br />
           <br />
-          <Typography variant="body1">Enter verification code.</Typography>
+          <Typography variant="body1">Enter the 6-digit verification code sent to {email || 'your email'}.</Typography>
         </div>
 
         <Box

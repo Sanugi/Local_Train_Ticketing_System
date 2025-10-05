@@ -197,7 +197,6 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from 'axios';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -210,6 +209,7 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import image from './assets/train.jpg'; 
+import axiosInstance from './service/axiosInstance';
 
 
 function Signup() {
@@ -223,7 +223,7 @@ function Signup() {
     e.preventDefault();
     setLoading(true); 
 
-    axios.post('http://localhost:7000/api/users/register', { username: name, email, password })
+    axiosInstance.post('users/register', { username: name, email, password })
       .then((result) => {
         console.log(result);
         setLoading(false);

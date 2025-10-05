@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Signup from './Signup'; 
 import Login from './Login'; 
@@ -8,10 +7,10 @@ import SeatBooking from "./SeatBooking";
 import BookTickets from "./BookTickets";
 import Payment from "./Payment";
 import ContactPage from "./ContactPage";
-import AddTrain from './AddTrain';
-import AddSchedule from './AddSchedule';
+import TrainManagement from './TrainManagement';
+import AddSchedule from './ScheduleManagement';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import AdminDashboard from './AdminDashBoard';
+import AdminDashboard from './AdminDashboard';
 
 function App() {
   return (
@@ -25,7 +24,7 @@ function App() {
         <Route path="/book-tickets" element={<BookTickets />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/addTrain" element={<AddTrain />} />
+        <Route path="/addTrain" element={<TrainManagement />} />
         <Route path="/addSchedule" element={<AddSchedule />} />
         <Route path="/adminDashboard" element={<AdminDashboard />} />
      
