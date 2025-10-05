@@ -10,7 +10,8 @@ import ContactPage from "./ContactPage";
 import TrainManagement from './TrainManagement';
 import AddSchedule from './ScheduleManagement';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import AdminDashboard from './AdminDashboard';
+import AdminDashboard from './AdminDashBoard';
+
 
 function App() {
   return (

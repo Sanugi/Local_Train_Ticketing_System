@@ -22,7 +22,7 @@ function AddTrain() {
         seatCount: Number(formData.seatCount),
         ticketPrice: Number(formData.ticketPrice),
       };
-      console.log("Token being sent:", localStorage.getItem("token"));
+
       const res = await axios.post("http://localhost:7000/api/trains", payload,
       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
