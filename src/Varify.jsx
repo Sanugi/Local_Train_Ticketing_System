@@ -1,213 +1,161 @@
-import Paper from "@mui/material/Paper";
-import { Link } from '@mui/material';
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import React  from "react";
-import Swal from "sweetalert2";
+import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { Input as BaseInput } from "@mui/base/Input";
-import { Box, styled } from "@mui/system";
-import { useNavigate, useLocation } from 'react-router-dom';
-import image from './assets/train.jpg';
+import Swal from "sweetalert2";
+import { useNavigate, useLocation } from "react-router-dom";
+import image from "./assets/train.jpg"; // Replace with your image
+import axiosInstance from "./service/axiosInstance";
 
-function OTP({ separator, length, value, onChange }) {
+// OTP Input Component
+function OTP({ separator, length, value = "", onChange }) {
+  const inputRefs = useRef(new Array(length).fill(null));
 
+  const focusInput = (i) => inputRefs.current[i]?.focus();
+  const selectInput = (i) => inputRefs.current[i]?.select();
 
-    //this only otp input part
-  const inputRefs = React.useRef(new Array(length).fill(null));
-
-  const focusInput = (targetIndex) => {
-    const targetInput = inputRefs.current[targetIndex];
-    targetInput.focus();
-  };
-
-  const selectInput = (targetIndex) => {
-    const targetInput = inputRefs.current[targetIndex];
-    targetInput.select();
-  };
-
-  const handleKeyDown = (event, currentIndex) => {
-    switch (event.key) {
-      case "ArrowUp":
-      case "ArrowDown":
-      case " ":
-        event.preventDefault();
-        break;
+  const handleKeyDown = (e, i) => {
+    switch (e.key) {
       case "ArrowLeft":
-        event.preventDefault();
-        if (currentIndex > 0) {
-          focusInput(currentIndex - 1);
-          selectInput(currentIndex - 1);
+        e.preventDefault();
+        if (i > 0) {
+          focusInput(i - 1);
+          selectInput(i - 1);
         }
-     break;
-    case "ArrowRight":
-      event.preventDefault();
-      if (currentIndex < length - 1) {
-        focusInput(currentIndex + 1);
-        selectInput(currentIndex + 1);
-      }
-      break;
-      case "Delete":
-        event.preventDefault();
-        onChange((prevOtp) => {
-          const otp =
-            prevOtp.slice(0, currentIndex) + prevOtp.slice(currentIndex + 1);
-          return otp;
-        });
-
+        break;
+      case "ArrowRight":
+        e.preventDefault();
+        if (i < length - 1) {
+          focusInput(i + 1);
+          selectInput(i + 1);
+        }
         break;
       case "Backspace":
-        event.preventDefault();
-        if (currentIndex > 0) {
-          focusInput(currentIndex - 1);
-          selectInput(currentIndex - 1);
+        e.preventDefault();
+        onChange((prev) => prev.slice(0, i) + prev.slice(i + 1));
+        if (i > 0) {
+          focusInput(i - 1);
+          selectInput(i - 1);
         }
-
-        onChange((prevOtp) => {
-          const otp =
-            prevOtp.slice(0, currentIndex) + prevOtp.slice(currentIndex + 1);
-          return otp;
-        });
         break;
-
       default:
         break;
     }
   };
 
-  const handleChange = (event, currentIndex) => {
-    const currentValue = event.target.value;
-    let indexToEnter = 0;
-
-    while (indexToEnter <= currentIndex) {
-      if (
-        inputRefs.current[indexToEnter].value &&
-        indexToEnter < currentIndex
-      ) {
-        indexToEnter += 1;
-      } else {
-        break;
-      }
-    }
-    onChange((prev) => {
-      const otpArray = prev.split("");
-      const lastValue = currentValue[currentValue.length - 1];
-      otpArray[indexToEnter] = lastValue;
-      return otpArray.join("");
-    });
-    if (currentValue !== "") {
-      if (currentIndex < length - 1) {
-        focusInput(currentIndex + 1);
-      }
-    }
+  const handleChange = (e, i) => {
+    // only allow digits
+    const inputVal = e.target.value.replace(/[^0-9]/g, "");
+    const newOtp = (value || "").split("");
+    newOtp[i] = inputVal.slice(-1); // take last entered character
+    onChange(newOtp.join(""));
+    if (inputVal && i < length - 1) focusInput(i + 1);
   };
 
-  const handleClick = (event, currentIndex) => {
-    selectInput(currentIndex);
-  };
-
-  const handlePaste = (event, currentIndex) => {
-    event.preventDefault();
-    const clipboardData = event.clipboardData;
-
-    // Check if there is text data in the clipboard
-    if (clipboardData.types.includes("text/plain")) {
-      let pastedText = clipboardData.getData("text/plain");
-      pastedText = pastedText.substring(0, length).trim();
-      let indexToEnter = 0;
-
-      while (indexToEnter <= currentIndex) {
-        if (
-          inputRefs.current[indexToEnter].value &&
-          indexToEnter < currentIndex
-        ) {
-          indexToEnter += 1;
-        } else {
-          break;
-        }
-      }
-
-      const otpArray = value.split("");
-
-      for (let i = indexToEnter; i < length; i += 1) {
-        const lastValue = pastedText[i - indexToEnter] ?? " ";
-        otpArray[i] = lastValue;
-      }
-
-      onChange(otpArray.join(""));
+  const handlePaste = (e, i) => {
+    e.preventDefault();
+    const text = e.clipboardData
+      .getData("text/plain")
+      .replace(/[^0-9]/g, "")
+      .slice(0, length);
+    const otpArray = (value || "").split("");
+    for (let j = i; j < length; j++) {
+      otpArray[j] = text[j - i] || "";
     }
+    onChange(otpArray.join(""));
   };
-
 
   return (
-    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+    <div className="flex items-center justify-center gap-2">
       {new Array(length).fill(null).map((_, index) => (
         <React.Fragment key={index}>
-          <BaseInput
-            slots={{
-              input: InputElement,
-            }}
-            aria-label={`Digit ${index + 1} of OTP`}
-            slotProps={{
-              input: {
-                ref: (ele) => {
-                  inputRefs.current[index] = ele;
-                },
-                onKeyDown: (event) => handleKeyDown(event, index),
-                onChange: (event) => handleChange(event, index),
-                onClick: (event) => handleClick(event, index),
-                onPaste: (event) => handlePaste(event, index),
-                value: value[index] ?? "",
-              },
-            }}
+          <input
+            ref={(el) => (inputRefs.current[index] = el)}
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            className="w-10 h-10 text-center rounded-full border border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none text-lg font-semibold shadow-sm transition"
+            value={value[index] || ""}
+            onChange={(e) => handleChange(e, index)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            onPaste={(e) => handlePaste(e, index)}
           />
-          {index === length - 1 ? null : separator}
+          {index < length - 1 && (separator || <span>-</span>)}
         </React.Fragment>
       ))}
-    </Box>
+    </div>
   );
 }
 
 OTP.propTypes = {
-  length: PropTypes.number.isRequired,
-  onChange: PropTypes.func.isRequired,
   separator: PropTypes.node,
-  value: PropTypes.string.isRequired,
+  length: PropTypes.number.isRequired,
+  value: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
 };
 
-//final part in otp input
+OTP.defaultProps = {
+  separator: null,
+  value: "",
+};
 
-
-function Varify() {
-  const [otp, setOtp] = React.useState("");
-  const location = useLocation();
-  const { email, code } = location.state || {};
+// Main Verify Page
+export default function Verify() {
+  const [otp, setOtp] = useState("");
+  const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { email } = location.state || {};
 
-  const resendOTP = () => {
-    setOtp("");
-    if (!email) {
-      Swal.fire({ position: "top", text: "Cannot resend OTP without email address", customClass: { confirmButton: 'my-button' } });
-      return;
-    }
-    Swal.fire({ position: "top", text: `A new OTP has been sent to ${email}`, customClass: { confirmButton: 'my-button' } });
-  };
-
-  const handleSubmit = () => {
-    if (!otp || otp.length !== 6) {
-      Swal.fire({ position: "top", text: "Please enter the 6-digit code.", customClass: { confirmButton: 'my-button' } });
-      return;
-    }
-
-    if (code && otp === String(code)) {
-      Swal.fire({ position: "top", text: "OTP verified successfully.", customClass: { confirmButton: 'my-button' } }).then(() => {
-        navigate('/');
+  const handleSubmit = async () => {
+    if (otp.length !== 6) {
+      Swal.fire({
+        position: "top",
+        text: "Please enter the 6-digit code.",
+        confirmButtonText: "OK",
       });
-    } else {
-      Swal.fire({ position: "top", text: "Invalid OTP. Please try again.", customClass: { confirmButton: 'my-button' } });
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post("/users/verify-reset-code", {
+        email,
+        otp,
+      });
+
+      const data = response.data;
+
+      if (data.success) {
+        Swal.fire({
+          position: "top",
+          text: data.message || "OTP verified successfully.",
+          confirmButtonText: "OK",
+        }).then(() => navigate("/reset-password",
+          {
+              state: {
+                email: email,
+              },
+            }
+        ));
+      } else {
+        Swal.fire({
+          position: "top",
+          text: data.message || "Invalid OTP. Please try again.",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch {
+      Swal.fire({
+        position: "top",
+        text: "Server error. Please try again later.",
+        confirmButtonText: "OK",
+      });
     }
   };
 
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((c) => c - 1), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
 
   return (
     <main
@@ -217,132 +165,39 @@ function Varify() {
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
         height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: '20px',
       }}
+      className="flex justify-center items-center p-4"
     >
-      <Paper
-        sx={{
-          width: 400,
-          mx: "auto", // margin left & right
-          my: 0, // margin top & bottom
-          py: 3, // padding top & bottom
-          px: 2, // padding left & right
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          borderRadius: "sm",
-          boxShadow: "md",
-            backgroundColor: 'rgba(190, 216, 230, 0.93)',
-          '&:hover': { 
-            transform: 'scale(1.02)', 
-            boxShadow: 'lg',
-          },
-        }}
-        variant="outlined"
-      >
-        <div>
-          <Typography variant="h5" component="h3">
-            <b>Verification</b>
-          </Typography>
-          <br />
-          <br />
-          <Typography variant="body1">Enter the 6-digit verification code sent to {email || 'your email'}.</Typography>
-        </div>
+      <div className="w-96 bg-white/90 rounded-xl shadow-md hover:scale-[1.02] transition transform p-6 backdrop-blur-sm">
+        <h2 className="text-2xl font-bold mb-2 text-gray-800">Verification</h2>
+        <p className="text-gray-700 mb-3">
+          Enter the 6-digit verification code sent to
+          <span className="font-medium">
+            {" "}
+            {email ? `${email.replace(/(.{2}).+@/, "$1***@")}` : "your email"}
+          </span>
+          .
+        </p>
+        <p className="text-sm text-gray-500 mb-4">
+          If you did not receive the code, wait a minute and check your spam
+          folder.
+        </p>
 
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
-          <OTP
-            separator={<span>-</span>}
-            value={otp}
-            onChange={setOtp}
-            length={6}
-          />
-
-       
-        </Box>
-
-        <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} onClick={handleSubmit} >
-          Verify
-        </Button>
-
-        <Typography
-          fontSize="sm"
-          sx={{
-            alignSelf: "center",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          Don&apos;t received the code?
-          <Link
-            component={Button}
-            underline="none"
-            sx={{ color: "blue", textTransform: "none", ml: 1 }}
-            onClick={resendOTP}
+        <OTP
+          separator={<span>-</span>}
+          value={otp}
+          onChange={setOtp}
+          length={6}
+        />
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={handleSubmit}
+            className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
           >
-            Resend
-          </Link>
-        </Typography>
-      </Paper>
+            Verify
+          </button>
+        </div>
+      </div>
     </main>
   );
 }
-
-const blue = {
-  200: "#80BFFF",
-  400: "#3399FF",
-  600: "#0072E5",
-};
-
-const grey = {
-  200: "#DAE2ED",
-  300: "#C7D0DD",
-  700: "#434D5B",
-  900: "#1C2025",
-};
-
-const InputElement = styled("input")(
-  ({ theme }) => `
-  width: 40px;
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 1.5;
-  padding: 8px 0px;
-  border-radius: 50%;
-  text-align: center;
-  color: ${theme.palette.mode === "dark" ? grey[300] : grey[900]};
-  background: ${theme.palette.mode === "dark" ? grey[900] : "#fff"};
-  border: 1px solid ${theme.palette.mode === "dark" ? grey[700] : grey[200]};
-  box-shadow: 0px 2px 4px ${
-    theme.palette.mode === "dark" ? "rgba(0,0,0, 0.5)" : "rgba(0,0,0, 0.05)"
-  };
-
-  &:hover {
-    border-color: ${blue[400]};
-  }
-
-  &:focus {
-    border-color: ${blue[400]};
-    box-shadow: 0 0 0 3px ${
-      theme.palette.mode === "dark" ? blue[600] : blue[200]
-    };
-  }
-
-  // firefox
-  &:focus-visible {
-    outline: 0;
-  }
-`
-);
-
-export default Varify;

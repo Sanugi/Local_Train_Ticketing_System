@@ -1,5 +1,6 @@
 import TrainManagement from "./TrainManagement";
 import ScheduleManagement from "./ScheduleManagement";
+import BookingManagement from "./BookingManagement";
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -20,6 +21,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import TrainIcon from "@mui/icons-material/Train";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import BookIcon from '@mui/icons-material/Book';
 import { BarChart, DoughnutChart, LineChart, StatCard } from "./components/Charts";
 import { dashboardService } from "./service/dashboardService";
 
@@ -69,6 +71,7 @@ function AdminDashboard() {
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon /> },
+    { text: "Bookings", icon: <BookIcon /> },
     { text: "Trains", icon: <TrainIcon /> },
     { text: "Train Schedule", icon: <AccessTimeIcon /> },
     { text: "Settings", icon: <SettingsIcon /> },
@@ -237,9 +240,11 @@ function AdminDashboard() {
           </Container>
         )}
 
-        {selectedPage === "Trains" && <TrainManagement />}
+  {selectedPage === "Bookings" && <BookingManagement />}
 
-        {selectedPage === "Train Schedule" && <ScheduleManagement />}
+  {selectedPage === "Trains" && <TrainManagement />}
+
+  {selectedPage === "Train Schedule" && <ScheduleManagement />}
 
         {selectedPage === "Settings" && (
           <>

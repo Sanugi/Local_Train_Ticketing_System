@@ -1,20 +1,29 @@
-import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import image from './assets/train.jpg';
 
 function BookTickets() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedSeats } = location.state || { selectedSeats: [] };
-
-  const trainDetails = {
-    trainNumber: "IC123",
-    trainName: "Intercity Express",
-    departureTime: "2025-09-05 07:30 AM",
-  };
+  const { bookingData, selectedSeats, train } = location.state || { selectedSeats: [], bookingData: null };
+  console.log(train);
+  const trainDetails =
+    bookingData?.trainDetails ||
+    bookingData?.trainInfo ||
+    (bookingData
+      ? {
+          trainNumber: train.trainNumber || "IC123",
+          trainName: train.trainName || "Intercity Express",
+          departureTime: train.departureTime || "2025-09-05 07:30 AM",
+        }
+      : {
+          trainNumber: "IC123",
+          trainName: "Intercity Express",
+          departureTime: "2025-09-05 07:30 AM",
+        });
 
   const handleBookTrain = () => {
-    navigate("/payment", { state: { selectedSeats, trainDetails } });
+    // forward the bookingData and selectedSeats to the payment page
+    navigate("/payment", { state: { bookingData, selectedSeats, trainDetails } });
   };
 
   return (
@@ -41,10 +50,13 @@ function BookTickets() {
 
         {/* Selected Seats */}
         <div style={styles.ticketInfo}>
-          <h3 style={styles.subHeading}>Selected Seats</h3>
-          <p style={styles.selectedSeats}>
-            {selectedSeats.join(", ") || "None"}
+          <p style={{ color: "#333", textAlign: "left" }}>
+            <strong>Price per seat:</strong> LKR {bookingData?.pricePerSeat ?? 0}.00
           </p>
+          <p style={{ color: "#333", textAlign: "left" }}>
+            <strong>Total:</strong> LKR {bookingData?.totalAmount ?? (selectedSeats.length * (bookingData?.pricePerSeat ?? 0))}.00
+          </p>
+          <p style={styles.selectedSeats}>{selectedSeats.join(", ") || "None"}</p>
         </div>
 
         {/* Book the Train Button */}

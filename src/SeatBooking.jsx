@@ -1,34 +1,56 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import image from "./assets/train.jpg";
+import axiosInstance from "./service/axiosInstance";
 
 function SeatBooking() {
-  const { scheduleId } = useParams(); // using scheduleId instead of trainNumber
+  const { id } = useParams();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [seats, setSeats] = useState([]);
   const [hoveredSeat, setHoveredSeat] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const seatPrice = 25;
+  const [dynamicPrice, setDynamicPrice] = useState(null);
+  const [scheduleId, setScheduleId] = useState(null);
+  const [train, setTrain] = useState(null);
 
-  // ✅ Replace with your auth logic
-  const userId = localStorage.getItem("userId"); // or from context
-
-  // 🔹 Fetch seats from backend schedule
   useEffect(() => {
-    axios
-      .get(`/train//${scheduleId}`)
+    axiosInstance
+      .get(`/schedules/train/${id}`)
       .then((res) => {
-        setSeats(res.data.seats); // must be array [{id, status}]
+        const payload = res.data.data || res.data; 
+        const schedule = Array.isArray(payload) ? payload[0] : payload;
+        if (!schedule) {
+          setSeats([]);
+          setLoading(false);
+          return;
+        }
+        setTrain(schedule.trainId);
+        if (schedule.trainId && schedule.trainId.ticketPrice) {
+          setDynamicPrice(Number(schedule.trainId.ticketPrice));
+        }
+        if(schedule._id){
+          setScheduleId(schedule._id);
+        }
+
+        const totalSeats = (schedule.trainId && schedule.trainId.seatCount) || 0;
+        const available = typeof schedule.availableSeats === "number" ? schedule.availableSeats : schedule.availableSeats ? Number(schedule.availableSeats) : 0;
+
+        const seatsArr = Array.from({ length: totalSeats }, (_, i) => {
+          const seatNumber = i + 1;
+          const isAvailable = seatNumber <= available;
+          return { id: seatNumber, status: isAvailable ? "available" : "booked" };
+        });
+
+        setSeats(seatsArr);
         setLoading(false);
       })
       .catch((err) => {
         console.error("Error fetching seats:", err);
         setLoading(false);
       });
-  }, [scheduleId]);
+  }, [id]);
 
   const toggleSeat = (seatId) => {
     setSelectedSeats((prev) =>
@@ -37,21 +59,18 @@ function SeatBooking() {
   };
 
   const handleBookNow = async () => {
-    if (!userId) {
-      alert("Please log in to continue");
-      return;
-    }
-
+    const pricePerSeat = dynamicPrice || 0;
     const bookingData = {
-      userId,
-      scheduleId,
+      trainId: id,
+      scheduleId: scheduleId,
+      seats: selectedSeats,
       seatsBooked: selectedSeats.length,
-      totalAmount: selectedSeats.length * seatPrice,
+      totalAmount: selectedSeats.length * pricePerSeat,
+      pricePerSeat: pricePerSeat,
     };
-
     try {
-      await axios.post("http://localhost:7000/api/bookings", bookingData);
-      navigate("/book-tickets", { state: { bookingData, selectedSeats } });
+      // forward booking data to the confirmation page which will route to payment
+      navigate("/book-tickets", { state: { bookingData, selectedSeats, train } });
     } catch (err) {
       console.error(err);
       alert("Booking failed. Try again.");
@@ -104,7 +123,7 @@ function SeatBooking() {
           <p style={{ color: "#fff" }}>
             Seats: {selectedSeats.join(", ") || "None"}
           </p>
-          <p style={{ color: "#fff" }}>Total: LKR {selectedSeats.length * seatPrice}.00</p>
+          <p style={{ color: "#fff" }}>Total: LKR {selectedSeats.length * dynamicPrice}.00</p>
           {selectedSeats.length > 0 && (
             <button onClick={handleBookNow} style={styles.bookNowButton}>
               Continue to Payment
@@ -120,7 +139,7 @@ const styles = {
   container: { padding: "20px", backgroundSize: "cover", minHeight: "100vh" },
   overlay: { backgroundColor: "rgba(0,0,0,0.7)", padding: "30px", borderRadius: "12px" },
   heading: { color: "#fff", marginBottom: "20px" },
-  train: { display: "grid", gridTemplateColumns: "repeat(4, 70px)", gap: "15px" },
+  train: { display: "grid", gridTemplateColumns: "repeat(10, 70px)", gap: "15px" },
   seat: { width: "70px", height: "70px", borderRadius: "10px", border: "2px solid #ccc" },
   bookingSummary: { marginTop: "20px", padding: "15px", background: "#333", borderRadius: "10px" },
   bookNowButton: {

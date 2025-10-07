@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Avatar,
   Button,
@@ -13,22 +13,58 @@ import {
 import PaymentIcon from "@mui/icons-material/Payment";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import background from "./assets/payment.avif";
+import axiosInstance from "./service/axiosInstance";
 
 function Payment() {
   const location = useLocation();
-  const { selectedSeats, trainDetails } = location.state || { selectedSeats: [] };
+  const navigate = useNavigate();
+  const { bookingData, selectedSeats } = location.state || { selectedSeats: [], bookingData: null };
 
   const [cardNumber, setCardNumber] = useState("");
   const [cardHolder, setCardHolder] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("card"); // or 'station'
+  const [loading, setLoading] = useState(false);
 
-  const handlePayment = () => {
-    if (!cardNumber || !cardHolder || !expiryDate || !cvv) {
-      alert("Please fill in all fields.");
-      return;
+  const effectiveBooking = bookingData || {
+    seats: selectedSeats || [],
+    seatsBooked: (selectedSeats && selectedSeats.length) || 0,
+    totalAmount: 0,
+    pricePerSeat: 0,
+  };
+
+  const handlePayment = async () => {
+    // If card payment selected, validate fields
+    if (paymentMethod === "card") {
+      if (!cardNumber || !cardHolder || !expiryDate || !cvv) {
+        alert("Please fill in all card fields.");
+        return;
+      }
     }
-    alert("Payment Successful! Tickets Booked.");
+
+    // Prepare payload to create booking on backend
+    const payload = {
+      trainId: bookingData?.trainId || bookingData?.train || null,
+      scheduleId: bookingData?.scheduleId || null,
+      seats: bookingData?.seats || selectedSeats,
+      seatsBooked: bookingData?.seatsBooked || (selectedSeats && selectedSeats.length) || 0,
+      totalAmount: bookingData?.totalAmount || 0,
+      paymentMethod,
+      paymentDetails: paymentMethod === "card" ? { cardNumber: cardNumber.slice(-4), cardHolder } : { note: "Pay at station" },
+    };
+
+    setLoading(true);
+    try {
+      await axiosInstance.post("/bookings", payload);
+      setLoading(false);
+      alert("Booking successful!");
+      navigate("/home");
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+      alert("Booking failed. Please try again.");
+    }
   };
 
   const defaultTheme = createTheme();
@@ -74,47 +110,77 @@ function Payment() {
 
             {/* Payment Form */}
             <Box component="form" noValidate sx={{ mt: 2, width: "100%" }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Card Number"
-                value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value)}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Card Holder Name"
-                value={cardHolder}
-                onChange={(e) => setCardHolder(e.target.value)}
-              />
-              <Box sx={{ display: "flex", gap: 2 }}>
-                <TextField
-                  margin="normal"
-                  required
-                  label="MM/YY"
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  fullWidth
-                />
-                <TextField
-                  margin="normal"
-                  required
-                  label="CVV"
-                  value={cvv}
-                  onChange={(e) => setCvv(e.target.value)}
-                  fullWidth
-                />
+              <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                Select payment method:
+              </Typography>
+              <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+                <Button
+                  variant={paymentMethod === "card" ? "contained" : "outlined"}
+                  onClick={() => setPaymentMethod("card")}
+                >
+                  Card
+                </Button>
+                <Button
+                  variant={paymentMethod === "station" ? "contained" : "outlined"}
+                  onClick={() => setPaymentMethod("station")}
+                >
+                  Pay at Station
+                </Button>
               </Box>
+
+              {paymentMethod === "card" && (
+                <>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    label="Card Number"
+                    value={cardNumber}
+                    onChange={(e) => setCardNumber(e.target.value)}
+                  />
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    label="Card Holder Name"
+                    value={cardHolder}
+                    onChange={(e) => setCardHolder(e.target.value)}
+                  />
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <TextField
+                      margin="normal"
+                      required
+                      label="MM/YY"
+                      value={expiryDate}
+                      onChange={(e) => setExpiryDate(e.target.value)}
+                      fullWidth
+                    />
+                    <TextField
+                      margin="normal"
+                      required
+                      label="CVV"
+                      value={cvv}
+                      onChange={(e) => setCvv(e.target.value)}
+                      fullWidth
+                    />
+                  </Box>
+                </>
+              )}
+
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2">Booking Summary</Typography>
+                <Typography>Seats: {effectiveBooking.seats?.join(", ") || "None"}</Typography>
+                <Typography>Total: LKR {effectiveBooking.totalAmount}.00</Typography>
+              </Box>
+
               <Button
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
                 onClick={handlePayment}
+                disabled={loading}
               >
-                Pay & Book
+                {loading ? "Processing..." : paymentMethod === "card" ? "Pay & Book" : "Confirm & Reserve"}
               </Button>
             </Box>
           </Box>

@@ -46,22 +46,27 @@ function Home() {
     if (!trains.length) return null;
 
     const totalTrains = trains.length;
-    const totalAvailableSeats = trains.reduce((sum, train) => sum + train.availableSeats, 0);
-    const averagePrice = Math.round(trains.reduce((sum, train) => sum + train.ticketPrice, 0) / trains.length);
+    const totalAvailableSeats = trains.reduce(
+      (sum, train) => sum + train.availableSeats,
+      0
+    );
+    const averagePrice = Math.round(
+      trains.reduce((sum, train) => sum + train.ticketPrice, 0) / trains.length
+    );
     const priceRange = {
-      min: Math.min(...trains.map(train => train.ticketPrice)),
-      max: Math.max(...trains.map(train => train.ticketPrice))
+      min: Math.min(...trains.map((train) => train.ticketPrice)),
+      max: Math.max(...trains.map((train) => train.ticketPrice)),
     };
-    
+
     // Group trains by time periods
     const timeDistribution = trains.reduce((acc, train) => {
-      const hour = parseInt(train.departureTime.split(':')[0]);
+      const hour = parseInt(train.departureTime.split(":")[0]);
       let period;
-      if (hour >= 5 && hour < 12) period = 'Morning';
-      else if (hour >= 12 && hour < 17) period = 'Afternoon';
-      else if (hour >= 17 && hour < 21) period = 'Evening';
-      else period = 'Night';
-      
+      if (hour >= 5 && hour < 12) period = "Morning";
+      else if (hour >= 12 && hour < 17) period = "Afternoon";
+      else if (hour >= 17 && hour < 21) period = "Evening";
+      else period = "Night";
+
       acc[period] = (acc[period] || 0) + 1;
       return acc;
     }, {});
@@ -71,7 +76,7 @@ function Home() {
       totalAvailableSeats,
       averagePrice,
       priceRange,
-      timeDistribution
+      timeDistribution,
     };
   };
 
@@ -149,28 +154,36 @@ function Home() {
                 <div style={styles.summaryLabel}>Available Trains</div>
               </div>
               <div style={styles.summaryCard}>
-                <div style={styles.summaryNumber}>{summary.totalAvailableSeats}</div>
+                <div style={styles.summaryNumber}>
+                  {summary.totalAvailableSeats}
+                </div>
                 <div style={styles.summaryLabel}>Total Seats</div>
               </div>
               <div style={styles.summaryCard}>
-                <div style={styles.summaryNumber}>Rs. {summary.averagePrice}</div>
+                <div style={styles.summaryNumber}>
+                  Rs. {summary.averagePrice}
+                </div>
                 <div style={styles.summaryLabel}>Avg Price</div>
               </div>
               <div style={styles.summaryCard}>
-                <div style={styles.summaryNumber}>Rs. {summary.priceRange.min} - {summary.priceRange.max}</div>
+                <div style={styles.summaryNumber}>
+                  Rs. {summary.priceRange.min} - {summary.priceRange.max}
+                </div>
                 <div style={styles.summaryLabel}>Price Range</div>
               </div>
             </div>
-            
+
             <div style={styles.timeDistribution}>
               <h4 style={styles.timeTitle}>🕒 Departure Times</h4>
               <div style={styles.timeGrid}>
-                {Object.entries(summary.timeDistribution).map(([period, count]) => (
-                  <div key={period} style={styles.timeSlot}>
-                    <span style={styles.timePeriod}>{period}</span>
-                    <span style={styles.timeCount}>{count} trains</span>
-                  </div>
-                ))}
+                {Object.entries(summary.timeDistribution).map(
+                  ([period, count]) => (
+                    <div key={period} style={styles.timeSlot}>
+                      <span style={styles.timePeriod}>{period}</span>
+                      <span style={styles.timeCount}>{count} trains</span>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -183,24 +196,28 @@ function Home() {
         )}
         {trains.length > 0 && (
           <div style={styles.ticketSection}>
-            <h3 style={styles.sectionTitle}>🚂 Available Trains ({trains.length})</h3>
+            <h3 style={styles.sectionTitle}>
+              🚂 Available Trains ({trains.length})
+            </h3>
             <div style={styles.trainGrid}>
               {trains.map((train, index) => (
                 <div key={index} style={styles.ticketCard}>
                   <div style={styles.trainHeader}>
                     <div style={styles.trainInfo}>
                       <h4 style={styles.trainName}>{train.trainName}</h4>
-                      <span style={styles.trainNumber}>#{train.trainNumber}</span>
+                      <span style={styles.trainNumber}>
+                        #{train.trainNumber}
+                      </span>
                     </div>
-                    <div style={styles.priceTag}>
-                      Rs. {train.ticketPrice}
-                    </div>
+                    <div style={styles.priceTag}>Rs. {train.ticketPrice}</div>
                   </div>
-                  
+
                   <div style={styles.routeInfo}>
                     <div style={styles.stationInfo}>
                       <span style={styles.stationLabel}>From:</span>
-                      <span style={styles.stationName}>{train.fromStation}</span>
+                      <span style={styles.stationName}>
+                        {train.fromStation}
+                      </span>
                     </div>
                     <div style={styles.routeArrow}>→</div>
                     <div style={styles.stationInfo}>
@@ -212,7 +229,9 @@ function Home() {
                   <div style={styles.scheduleInfo}>
                     <div style={styles.scheduleItem}>
                       <span style={styles.scheduleLabel}>📅 Date:</span>
-                      <span>{new Date(train.departureDate).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(train.departureDate).toLocaleDateString()}
+                      </span>
                     </div>
                     <div style={styles.scheduleItem}>
                       <span style={styles.scheduleLabel}>🕐 Time:</span>
@@ -220,18 +239,28 @@ function Home() {
                     </div>
                     <div style={styles.scheduleItem}>
                       <span style={styles.scheduleLabel}>💺 Available:</span>
-                      <span style={train.availableSeats < 10 ? styles.lowSeats : styles.normalSeats}>
+                      <span
+                        style={
+                          train.availableSeats < 10
+                            ? styles.lowSeats
+                            : styles.normalSeats
+                        }
+                      >
                         {train.availableSeats} seats
                       </span>
                     </div>
                   </div>
 
                   <button
-                    style={train.availableSeats > 0 ? styles.bookButton : styles.disabledButton}
+                    style={
+                      train.availableSeats > 0
+                        ? styles.bookButton
+                        : styles.disabledButton
+                    }
                     onClick={() => handleBookSeat(train)}
                     disabled={train.availableSeats === 0}
                   >
-                    {train.availableSeats > 0 ? 'Book Now' : 'Fully Booked'}
+                    {train.availableSeats > 0 ? "Book Now" : "Fully Booked"}
                   </button>
                 </div>
               ))}
@@ -239,9 +268,15 @@ function Home() {
           </div>
         )}
 
-        <Link to="/" style={styles.logout}>
-          Logout
-        </Link>
+        <div style={styles.bottomRow}>
+          <Link to="/bookingManagement" style={styles.viewBooking}>
+            View My Booking
+          </Link>
+
+          <Link to="/" style={styles.logoutRight}>
+            Logout
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -526,6 +561,27 @@ const styles = {
     textAlign: "center",
     textDecoration: "none",
     color: "#3f51b5",
+  },
+  bottomRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "30px",
+  },
+  viewBooking: {
+    textDecoration: "none",
+    color: "#ffffff",
+    backgroundColor: "#3f51b5",
+    padding: "10px 18px",
+    borderRadius: "8px",
+    fontWeight: "bold",
+  },
+  logoutRight: {
+    textDecoration: "none",
+    color: "#3f51b5",
+    padding: "8px 12px",
+    borderRadius: "8px",
+    fontWeight: "bold",
   },
 };
 
